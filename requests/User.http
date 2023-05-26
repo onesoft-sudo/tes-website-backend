@@ -1,0 +1,28 @@
+DELETE http://localhost:8000/users/1
+Accept: application/json
+
+###
+PUT http://localhost:8000/users/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username": "root"
+}
+
+###
+POST http://localhost:8000/users
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Ar Rakin",
+    "username": "rakinar2",
+    "discord_id": "123456",
+    "password": "root",
+    "super_token": "root2"
+}
+
+###
+
+
