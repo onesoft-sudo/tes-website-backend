@@ -37,7 +37,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return $user;
+        return $user->only(['name', 'email', 'username', 'created_at']);
     }
 
     /**
@@ -71,5 +71,40 @@ class UserController extends Controller
     {
         $user->delete();
         return ["status" => "Successfully deleted account"];
+    }
+
+    public function login(Request $request)
+    {
+        $validated = $request->validate([
+            'username' => 'string|min:2|max:100',
+            'email' => 'string|email',
+            'password' => 'required|string|min:2'
+        ]);
+
+        if (!$validated["email"] && !$validated["username"]) {
+            return response([
+                "error" => "You must specify a username or email to log in"
+            ], 400);
+        }
+
+        /** @var User|null $user */
+        $user = User::where('email', $validated['email'])->orWhere('username', $validated['username'])->get();
+
+        if (!$user) {
+            return response([
+                "error" => "Incorrect email or username provided"
+            ], 401);
+        }
+
+        if (!Hash::check($validated['password'], $user->password)) {
+            return response([
+                "error" => "Incorrect password provided"
+            ], 401);
+        }
+
+        return [
+            "message" => "Login successful",
+            "user" => $user->only(['name', 'username', 'created_at', 'updated_at', 'token'])
+        ];
     }
 }

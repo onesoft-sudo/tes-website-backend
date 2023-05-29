@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Reply;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,15 +13,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('threads', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('email')->nullable();
-            $table->string('username')->unique();
-            $table->string('discord_id')->unique();
-            $table->string('password');
-            $table->string('token')->nullable();
-            $table->rememberToken();
+            $table->text('title');
+            $table->boolean('is_edited')->default(false);
+            $table->foreignIdFor(User::class, "user_id");
+            $table->bigInteger("reply_id")->default(null)->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('threads');
     }
 };

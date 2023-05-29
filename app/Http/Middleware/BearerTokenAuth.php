@@ -2,17 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use App\Utils\RequestWithTokenAuth;
 
-class SuperAdminAuth
+class BearerTokenAuth
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(Request): (Response)  $next
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -38,12 +39,15 @@ class SuperAdminAuth
 
         [, $token] = $authorization;
 
-        if ($token !== env('SUPER_ADMIN_PASSWORD')) {
+        /** @var User|null $user */
+        $user = User::where('token', $token)->first();
+
+        if (!$user) {
             return response([
-                "error" => "You're not allowed to perform this action"
-            ], 403);
+                "error" => "Invalid bearer token found in the request"
+            ], 401);
         }
 
-        return $next($request);
+        return $next(RequestWithTokenAuth::createFrom($request)->setUser($user));
     }
 }

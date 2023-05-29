@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\BearerTokenAuth;
 use App\Http\Middleware\SuperAdminAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +21,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [MainController::class, 'index']);
 
-Route::middleware(SuperAdminAuth::class)->group(function () {
-    Route::apiResource('users', UserController::class);
+Route::prefix('/api')->group(function () {
+    Route::middleware(SuperAdminAuth::class)->group(function () {
+        Route::apiResource('users', UserController::class);
+    });
+
+    Route::middleware(BearerTokenAuth::class)->group(function () {
+        Route::apiResource('threads', ThreadController::class, [
+            'except' => ['index', 'show']
+        ]);
+    });
+
+    Route::apiResource('threads', ThreadController::class, [
+        'only' => ['index', 'show']
+    ]);
 });
